@@ -1,0 +1,17 @@
+.ipynb_checkpoints
+*/.ipynb_checkpoints/*
+
+catboost_info
+
+env
+
+__pycache__
+
+data/*.mp4
+
+__pycache__
+
+# macos
+.DS_Store
+
+data/screen_to_frame.p
