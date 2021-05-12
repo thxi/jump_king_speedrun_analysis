@@ -5,6 +5,10 @@ from collections import defaultdict
 from tqdm.auto import tqdm
 
 
+def dist(a, b):
+    return (a[0] - b[0])**2 + (a[1] - b[1])**2
+
+
 def open_video(filename):
     cap = cv2.VideoCapture(filename)
     # Check if camera opened successfully
