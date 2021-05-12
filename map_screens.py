@@ -1,3 +1,6 @@
+# used to map frames to screens
+# so that each screen can be extracted from the game
+# by averaging the frames within each screen
 import cv2
 import pandas as pd
 
@@ -6,12 +9,10 @@ cap = cv2.VideoCapture('data/speedrun.mp4')
 print("are you sure you want to overwrite frames dataframe?")
 _ = input()
 
-
 # Check if camera opened successfully
 if (cap.isOpened() == False):
     print("Error opening video stream or file")
     exit(1)
-
 
 fps = cap.get(cv2.CAP_PROP_FPS)
 print(f"FPS: {fps}")
@@ -23,7 +24,7 @@ mark_start = True
 current_start = ()
 screen_n = 0
 
-while(cap.isOpened()):
+while (cap.isOpened()):
     # Capture frame-by-frame
     ret, frame = cap.read()
     if ret == True:
@@ -42,7 +43,7 @@ while(cap.isOpened()):
                 print("end", i)
                 print(screen_n)
                 screen_n += 1
-            mark_start = not(mark_start)
+            mark_start = not (mark_start)
 
         # Press Q on keyboard to exit
         if k == ord('q'):
@@ -53,7 +54,6 @@ while(cap.isOpened()):
         # Break the loop if something is wrong
     else:
         break
-
 
 # When everything done, release the video capture object
 cap.release()
