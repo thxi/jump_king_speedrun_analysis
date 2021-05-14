@@ -47,6 +47,8 @@ positions = []
 # if go back, then have to initialize screen_positions differently
 # if go back, then have to jump to next frame first
 for screen, frames in tqdm(screen_to_frames.items()):
+    if screen < 24:
+        continue
     for (start, end) in frames:
         cap.set(cv2.CAP_PROP_POS_FRAMES, start)
         if len(positions) != 0:
@@ -55,8 +57,8 @@ for screen, frames in tqdm(screen_to_frames.items()):
         else:
             screen_positions = [(30, 40)]
 
+        n = end - start
         for i in range(n):
-            print(screen)
             avg_frame = screen_to_frame[screen]
             ret, frame = cap.read()
             if ret == False:
@@ -73,7 +75,7 @@ for screen, frames in tqdm(screen_to_frames.items()):
             # TODO: if needed
             # avg_frame = (0.3 * frame + 0.7 * avg_frame).astype(np.uint8)
 
-            ret, thres = cv2.threshold(frame_diff, 30, 255, cv2.THRESH_BINARY)
+            ret, thres = cv2.threshold(frame_diff, 50, 255, cv2.THRESH_BINARY)
             dilate_frame = cv2.dilate(thres, None, iterations=2)
 
             contours, hierarchy = cv2.findContours(dilate_frame,
@@ -91,14 +93,13 @@ for screen, frames in tqdm(screen_to_frames.items()):
             elif len(contours) == 1:
                 (x, y, w, h) = cv2.boundingRect(contours[0])
                 if dist(screen_positions[-1], (x + w // 2, y + h // 2)) > 200:
-                    print("more than 50")
+                    # print("more than 50")
                     # detected another object
                     screen_positions.append(screen_positions[-1])
                 else:
                     # print("her")
                     screen_positions.append((x + w // 2, y + h // 2))
             else:
-                # TODO: choose the one with more intersection
                 distances = []
                 for contour in contours:
                     (x, y, w, h) = cv2.boundingRect(contour)
@@ -116,7 +117,7 @@ for screen, frames in tqdm(screen_to_frames.items()):
             orig_frame = np.concatenate((orig_frame, avg_frame), axis=0)
             orig_frame = imutils.resize(orig_frame, width=600)
             cv2.imshow("view", orig_frame)
-            k = cv2.waitKey(10) & 0xFF
+            k = cv2.waitKey(100) & 0xFF
             if k == ord('q'):
                 exit(1)
 
