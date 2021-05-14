@@ -77,6 +77,9 @@ def map_frames(filename, screen_to_frame):
             print("something went wrong")
             exit(1)
 
+    if start_frame_idx == -1:
+        print(f"video {filename}, start_frame_idx is -1")
+        exit(228)
     print(f"video starts at frame {start_frame_idx}")
 
     print("mapping screens")
