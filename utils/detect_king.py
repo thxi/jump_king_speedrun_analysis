@@ -1,36 +1,16 @@
 from collections import defaultdict
-import numpy as np
 
 import cv2
 import imutils
-
+import numpy as np
 from tqdm.auto import tqdm
+
 from utils.utils import crop_margins, dist, get_game_margins
 
 
-def get_king_positions(cap, screen_to_frames):
+def get_king_positions(cap, screen_to_frames, screen_to_frame):
     margin_left, margin_right = get_game_margins(cap)
     cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
-    # make new screen to frame
-    print("making screen to frame for video")
-    screen_to_frame = {}
-    for screen, frames in tqdm(screen_to_frames.items()):
-        start, end = frames[0]
-        n = end - start
-        cap.set(cv2.CAP_PROP_POS_FRAMES, start)
-        frames = []
-        for _ in range(n):
-            ret, frame = cap.read()
-            if ret == False:
-                break
-
-            frame = crop_margins(frame, margin_left, margin_right)
-            frame = imutils.resize(frame, width=60)
-            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-            frames.append(frame)
-
-        avg_frame = np.mean(frames, axis=0)
-        screen_to_frame[screen] = avg_frame.astype(np.uint8)
 
     screen_to_positions = defaultdict(list)  # {screen: [[x, y]]}
     positions = []
@@ -39,6 +19,9 @@ def get_king_positions(cap, screen_to_frames):
     # if go back, then have to initialize screen_positions differently
     # if go back, then have to jump to next frame first
     for screen, frames in tqdm(screen_to_frames.items()):
+        avg_frame = screen_to_frame[screen]
+        avg_frame = cv2.cvtColor(avg_frame, cv2.COLOR_BGR2GRAY)
+        avg_frame = imutils.resize(avg_frame, width=60)
         for (start, end) in frames:
             cap.set(cv2.CAP_PROP_POS_FRAMES, start)
             if len(positions) != 0:
@@ -48,8 +31,7 @@ def get_king_positions(cap, screen_to_frames):
                 screen_positions = [(30, 40)]
 
             n = end - start
-            for i in range(n):
-                avg_frame = screen_to_frame[screen]
+            for _ in range(n):
                 ret, frame = cap.read()
                 if ret == False:
                     break
