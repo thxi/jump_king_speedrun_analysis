@@ -41,7 +41,7 @@ while (cap.isOpened()):
     cv2.imshow('Frame', frame)
 
     # d to mark the start
-    k = cv2.waitKey(100) & 0xFF
+    k = cv2.waitKey(15) & 0xFF
     if k == ord('d'):
         if mark_start:
             current_start = i

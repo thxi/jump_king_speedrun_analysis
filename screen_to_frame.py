@@ -1,5 +1,7 @@
 # used to obtain averaged frame for each screen
 # need to run map_screens.py first
+import argparse
+
 import pandas as pd
 import numpy as np
 
@@ -12,7 +14,17 @@ from utils.utils import open_video, get_game_margins, crop_margins
 
 frames_df = pd.read_csv('data/screen_frames_info.csv')
 
-cap = open_video('data/speedrun.mp4')
+ap = argparse.ArgumentParser()
+ap.add_argument("-v", "--video", help="path to the video file")
+args = vars(ap.parse_args())
+
+cap = None
+video = args.get("video", None)
+if video is None:
+    print("--video should be specified")
+    exit(1)
+else:
+    cap = open_video(video)
 
 margin_left, margin_right = get_game_margins(cap)
 cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
