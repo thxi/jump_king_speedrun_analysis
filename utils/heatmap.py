@@ -6,6 +6,8 @@ import imutils
 from scipy.spatial import cKDTree
 
 
+# the idea of an efficient implementation
+# is taken from https://stackoverflow.com/a/59920744
 def data_coord2view_coord(p, resolution, pmin, pmax):
     dp = pmax - pmin
     dv = (p - pmin) / dp * resolution
@@ -26,27 +28,30 @@ def kNN2DDens(xv, yv, resolution, neighbours, dim=2):
     return im
 
 
+# produce heatmap for a screen
 def make_heatmap(positions, screen):
     np.random.seed(0)
     # remapping x with inverted y to w, h
     xmax = 60
     ymax = 44
-    s2p = choices(positions, k=1000)
 
-    eps = np.random.normal(0, 1, size=1000)
-    xs = np.array([i[0] for i in s2p]) + eps
-    eps = np.random.normal(0, 1, size=1000)
-    ys = np.array([i[1] for i in s2p]) + eps
+    x = np.array([])
+    y = np.array([])
+    for i in range(1, len(positions)):
+        prev = positions[i - 1]
+        cur = positions[i]
+        x = np.append(x, np.linspace(prev[0], cur[0], num=20))
+        y = np.append(y, np.linspace(prev[1], cur[1], num=20))
 
     resolution = 250
 
     extent = [0, xmax, 0, ymax]
-    xv = data_coord2view_coord(xs, resolution, extent[0], extent[1])
-    yv = data_coord2view_coord(ys, resolution, extent[2], extent[3])
+    xv = data_coord2view_coord(x, resolution, extent[0], extent[1])
+    yv = data_coord2view_coord(y, resolution, extent[2], extent[3])
 
     neighbours = 2
     im = kNN2DDens(xv, yv, resolution, neighbours)
-    im = im * 3000
+    im = im * 2000
     im = np.clip(im, 0, 255).astype(np.uint8)
     im = cv2.resize(im, (60, 44))
     im = cv2.applyColorMap(im, cv2.COLORMAP_OCEAN)
@@ -61,7 +66,7 @@ def make_heatmap(positions, screen):
     for i in range(im.shape[0]):
         for j in range(im.shape[1]):
             if im[i][j][0] > 100:
-                transp_mask[i][j] = 0.3
+                transp_mask[i][j] = 0.4
 
     heatmap = (transp_mask * im).astype(np.uint8) + (
         (1 - transp_mask) * screen).astype(np.uint8)

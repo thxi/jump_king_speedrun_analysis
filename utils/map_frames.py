@@ -7,8 +7,9 @@ from tqdm.auto import tqdm
 from .utils import open_video, get_game_margins, crop_margins
 
 
-def map_frames(filename, screen_to_frame):
-    cap = open_video(filename)
+# map each frame in the video
+# i.e. to which screen a frame belongs
+def map_frames(cap, screen_to_frame):
 
     margin_left, margin_right = get_game_margins(cap)
     cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
@@ -41,7 +42,7 @@ def map_frames(filename, screen_to_frame):
             exit(1)
 
     if start_frame_idx == -1:
-        print(f"video {filename}, start_frame_idx is -1")
+        print(f"start_frame_idx is -1")
         exit(228)
     print(f"video starts at frame {start_frame_idx}")
 
@@ -61,25 +62,28 @@ def map_frames(filename, screen_to_frame):
     i = start_frame_idx
     for _ in tqdm(range(length - start_frame_idx)):
         ret, frame = cap.read()
-        if ret == True:
-            frame = crop_margins(frame, margin_left, margin_right)
-            frame = imutils.resize(frame, width=60).ravel()
-            distances = np.sum((screen_to_frame - frame)**2, axis=1)
-            screen = np.argmin(distances)
-            if screen != prev_screen:
-                screen_to_frames[prev_screen].append((start, i))
-                prev_screen = screen
-                start = i
-            frame_to_screen.append(screen)
-            i += 1
-        else:
-            print("something went wrong")
+        if not (ret):
+            print("could not map screens, ret=False")
             exit(1)
+        frame = crop_margins(frame, margin_left, margin_right)
+        frame = imutils.resize(frame, width=60).ravel()
+        distances = np.sum((screen_to_frame - frame)**2, axis=1)
+        screen = np.argmin(distances)
+        if screen != prev_screen:
+            screen_to_frames[prev_screen].append((start, i))
+            prev_screen = screen
+            start = i
+        frame_to_screen.append(screen)
+        i += 1
 
     screen_to_frames[screen].append((start, i))
 
-    cap.release()
     print("done mapping screens")
+
+    # special case for the ending screen
+    # when detected more frames than needed
+    xy = screen_to_frames[42][0]
+    screen_to_frames[42][0] = (xy[0], xy[0] + 140)
 
     # usually there is an ending screen in video
     # this removes incorrectly classified frames

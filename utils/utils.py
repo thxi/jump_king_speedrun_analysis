@@ -21,6 +21,9 @@ def get_game_margins(cap):
     cap.set(cv2.CAP_PROP_POS_FRAMES, length // 2)
 
     ret, frame = cap.read()
+    if not (ret):
+        print("could not get game magins, ret=False")
+        exit(1)
     count_left = 0
     for pixel in frame[0]:
         if (pixel == [0, 0, 0]).all():

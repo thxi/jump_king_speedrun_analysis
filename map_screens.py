@@ -1,22 +1,30 @@
-# used to map frames to screens
+# used to map frames to screens manually
 # so that each screen can be extracted from the game
 # by averaging the frames within each screen
+import argparse
+
 import cv2
 import pandas as pd
 
-cap = cv2.VideoCapture('data/speedrun.mp4')
+from utils.utils import open_video
 
-print("are you sure you want to overwrite frames dataframe?")
-_ = input()
+ap = argparse.ArgumentParser()
+ap.add_argument("-v", "--video", help="path to the video file")
+args = vars(ap.parse_args())
 
-# Check if camera opened successfully
-if (cap.isOpened() == False):
-    print("Error opening video stream or file")
+cap = None
+video = args.get("video", None)
+if video is None:
+    print("--video should be specified")
     exit(1)
+else:
+    cap = open_video(video)
 
-fps = cap.get(cv2.CAP_PROP_FPS)
-print(f"FPS: {fps}")
-print(f"SPF: {1000/fps}")
+print("are you sure you want to overwrite frames dataframe?",
+      "Press Enter if you want to continue",
+      "Press Ctrl+C to abort",
+      sep='\n')
+_ = input()
 
 frames_data = []
 i = 0
@@ -25,40 +33,34 @@ current_start = ()
 screen_n = 0
 
 while (cap.isOpened()):
-    # Capture frame-by-frame
     ret, frame = cap.read()
-    if ret == True:
+    if not (ret):
+        print("something went wrong")
+        exit(1)
 
-        # Display the resulting frame
-        cv2.imshow('Frame', frame)
+    cv2.imshow('Frame', frame)
 
-        # d to mark the start
-        k = cv2.waitKey(int(10)) & 0xFF
-        if k == ord('d'):
-            if mark_start:
-                current_start = i
-                print("start", i)
-            else:
-                frames_data.append((screen_n, current_start, i))
-                print("end", i)
-                print(screen_n)
-                screen_n += 1
-            mark_start = not (mark_start)
+    # d to mark the start
+    k = cv2.waitKey(100) & 0xFF
+    if k == ord('d'):
+        if mark_start:
+            current_start = i
+            print("start", i)
+        else:
+            frames_data.append((screen_n, current_start, i))
+            print("end", i)
+            print(screen_n)
+            screen_n += 1
+        mark_start = not (mark_start)
 
-        # Press Q on keyboard to exit
-        if k == ord('q'):
-            break
-
-        i += 1
-
-        # Break the loop if something is wrong
-    else:
+    # q to exit
+    if k == ord('q'):
         break
 
-# When everything done, release the video capture object
+    i += 1
+
 cap.release()
 
-# Closes all the frames
 cv2.destroyAllWindows()
 
 frames_df = pd.DataFrame(frames_data, columns=["screen", "start", "end"])

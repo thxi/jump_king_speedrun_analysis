@@ -6,6 +6,8 @@ from tqdm.auto import tqdm
 from utils.utils import crop_margins, get_game_margins
 
 
+# used to obtain a finer version of screen_to_frame
+# for future use
 def get_screen_to_frame(cap, screen_to_frames):
     margin_left, margin_right = get_game_margins(cap)
     # make new screen to frame
