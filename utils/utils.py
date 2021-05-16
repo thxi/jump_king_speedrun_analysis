@@ -26,14 +26,14 @@ def get_game_margins(cap):
         exit(1)
     count_left = 0
     for pixel in frame[0]:
-        if (pixel == [0, 0, 0]).all():
+        if (pixel <= [5, 5, 5]).all():
             count_left += 1
         else:
             break
 
     count_right = 0
     for pixel in np.flip(frame[0], axis=0):
-        if (pixel == [0, 0, 0]).all():
+        if (pixel <= [5, 5, 5]).all():
             count_right += 1
         else:
             break
