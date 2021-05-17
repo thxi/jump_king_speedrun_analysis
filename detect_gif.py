@@ -4,6 +4,7 @@ from collections import defaultdict
 
 import cv2
 import imutils
+import imageio
 import numpy as np
 from tqdm.auto import tqdm
 
@@ -27,6 +28,7 @@ cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
 screen_to_positions = defaultdict(list)  # {screen: [[x, y]]}
 positions = []
 
+images = []
 print("getting king's positions")
 for screen, frames in tqdm(screen_to_frames.items()):
     avg_frame = screen_to_frame[screen]
@@ -47,6 +49,9 @@ for screen, frames in tqdm(screen_to_frames.items()):
                 break
 
             frame = crop_margins(frame, margin_left, margin_right)
+            orig_side = frame.copy()
+            orig_side = imutils.resize(orig_side, width=200)
+            # orig_side = cv2.resize(orig_side, (600, 450))
             frame = imutils.resize(frame, width=60)
             orig_frame = frame.copy()
 
@@ -89,11 +94,18 @@ for screen, frames in tqdm(screen_to_frames.items()):
             cv2.rectangle(orig_frame, (x - 3, y - 3), (x + 3, y + 3),
                           (0, 255, 0), 1)
 
+            orig_frame = imutils.resize(orig_frame, width=200)
+            orig_frame = np.concatenate((orig_side, orig_frame), axis=1)
             cv2.imshow('frame', orig_frame)
-            k = cv2.waitKey(50) & 0xFF
+
+            orig_frame = cv2.cvtColor(orig_frame, cv2.COLOR_BGR2RGB)
+            images.append(orig_frame)
+            k = cv2.waitKey(25) & 0xFF
             if k == ord('q'):
                 break
             if k == ord('d'):
+                print(len(images))
+                imageio.mimsave('data/detect_gif.gif', images, duration=0.03)
                 exit(1)
 
 cv2.destroyAllWindows()
