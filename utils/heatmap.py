@@ -59,7 +59,7 @@ def make_heatmap(positions, screen):
     im = cv2.GaussianBlur(im, (3, 3), cv2.BORDER_DEFAULT)
 
     # im is bgr
-    im = cv2.resize(im, (600, 448))
+    im = cv2.resize(im, (600, 450))
     transp_mask = np.zeros_like(im).astype(np.float32)
 
     # make background transparent

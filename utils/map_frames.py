@@ -10,6 +10,7 @@ from .utils import open_video, get_game_margins, crop_margins
 # map each frame in the video
 # i.e. to which screen a frame belongs
 def map_frames(cap, screen_to_frame):
+    screen_to_frame = np.array([v.ravel() for v in screen_to_frame.values()])
 
     margin_left, margin_right = get_game_margins(cap)
     cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
@@ -26,7 +27,8 @@ def map_frames(cap, screen_to_frame):
         ret, frame = cap.read()
         if ret == True:
             frame = crop_margins(frame, margin_left, margin_right)
-            frame = imutils.resize(frame, width=60).ravel()
+            frame = imutils.resize(frame, width=60)
+            frame = cv2.resize(frame, (60, 44)).ravel()
 
             distances = np.sum((screen_to_frame - frame)**2, axis=1)
             screen = np.argmin(distances)
@@ -66,7 +68,8 @@ def map_frames(cap, screen_to_frame):
             print("could not map screens, ret=False")
             exit(1)
         frame = crop_margins(frame, margin_left, margin_right)
-        frame = imutils.resize(frame, width=60).ravel()
+        frame = imutils.resize(frame, width=60)
+        frame = cv2.resize(frame, (60, 44)).ravel()
         distances = np.sum((screen_to_frame - frame)**2, axis=1)
         screen = np.argmin(distances)
         if screen != prev_screen:
@@ -77,8 +80,6 @@ def map_frames(cap, screen_to_frame):
         i += 1
 
     screen_to_frames[screen].append((start, i))
-
-    print("done mapping screens")
 
     # special case for the ending screen
     # when detected more frames than needed

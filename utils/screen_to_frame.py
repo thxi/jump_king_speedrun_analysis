@@ -25,6 +25,7 @@ def get_screen_to_frame(cap, screen_to_frames):
 
             frame = crop_margins(frame, margin_left, margin_right)
             frame = imutils.resize(frame, width=600)
+            frame = cv2.resize(frame, (600, 450))
             frames.append(frame)
 
         avg_frame = np.mean(frames, axis=0)

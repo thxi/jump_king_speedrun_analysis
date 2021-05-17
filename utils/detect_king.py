@@ -49,12 +49,6 @@ def get_king_positions(cap, screen_to_frames, screen_to_frame):
                 contours, _ = cv2.findContours(dilate_frame, cv2.RETR_EXTERNAL,
                                                cv2.CHAIN_APPROX_SIMPLE)
 
-                for contour in contours:
-                    # draw candidates
-                    (x, y, w, h) = cv2.boundingRect(contour)
-                    cv2.rectangle(orig_frame, (x, y), (x + w, y + h),
-                                  (0, 0, 255), 1)
-
                 if len(contours) == 0:
                     # screen_positions.append(screen_positions[-1])
                     pass
@@ -78,8 +72,6 @@ def get_king_positions(cap, screen_to_frames, screen_to_frame):
                     screen_positions.append((x + w // 2, y + h // 2))
 
                 x, y = screen_positions[-1]
-                cv2.rectangle(orig_frame, (x - 3, y - 3), (x + 3, y + 3),
-                              (0, 255, 0), 1)
 
             positions = positions + screen_positions
             screen_to_positions[screen] += screen_positions

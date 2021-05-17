@@ -27,6 +27,7 @@ else:
     cap = open_video(video)
 
 margin_left, margin_right = get_game_margins(cap)
+print(margin_left, margin_right)
 cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
 
 screen_to_frame = {}
@@ -46,11 +47,15 @@ for i in tqdm(range(len(frames_df))):
             break
         frame = crop_margins(frame, margin_left, margin_right)
         frames.append(frame)
+
     frames = np.array(frames)
     avg = np.mean(frames, axis=0)
     avg = imutils.resize(avg, width=60)
+    avg = cv2.resize(avg, (60, 44))
     screen_to_frame[screen] = avg.astype(np.uint8)
 
 cap.release()
+
+cv2.destroyAllWindows()
 
 pickle.dump(screen_to_frame, open("data/screen_to_frame.p", "wb"))

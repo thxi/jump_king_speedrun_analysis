@@ -12,7 +12,6 @@ from utils.screen_to_frame import get_screen_to_frame
 from utils.utils import open_video
 
 screen_to_frame = pickle.load(open("data/screen_to_frame.p", "rb"))
-screen_to_frame = np.array([v.ravel() for v in screen_to_frame.values()])
 
 ap = argparse.ArgumentParser()
 ap.add_argument("-v", "--video", help="path to the video file")
@@ -36,6 +35,7 @@ positions, screen_to_positions = get_king_positions(cap, screen_to_frames,
                                                     screen_to_frame)
 cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
 
+print("drawing the heatmap")
 screen_to_heatmap = {}
 for i in tqdm(range(43)):
     heatmap = make_heatmap(screen_to_positions[i], screen_to_frame[i])
